@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"math/rand"
 	"time"
-    "flag"
+	"flag"
 )
 
 var port int
@@ -17,18 +17,18 @@ func init() {
 func main() {
 	rand.Seed(time.Now().Unix())
 	flag.Parse()
-    fmt.Printf("Starting the flaky backend at port [%d]\n", port)
+	fmt.Printf("Starting the flaky backend at port [%d]\n", port)
 
 	a := gin.Default()
 	a.GET("/", func(c *gin.Context) {
-		products := ""
-		for total := rand.Int31n(20); total > 0; total-- {
-			products += MakeProduct()
-		}
 		fakeLoad()
 		if 90 < rand.Int31n(100) {
 			c.String(500, "Internal server error")
 		} else {
+			products := ""
+			for total := rand.Int31n(20); total > 0; total-- {
+				products += MakeProduct()
+			}
 			c.String(200, fmt.Sprintf("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<ProductList>%s\n</ProductList>", products))
 		}
 	})

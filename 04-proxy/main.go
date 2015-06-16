@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/plimble/ace"
+	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -21,8 +21,8 @@ const globalTimeout = 250 * time.Millisecond
 
 func main() {
 	rand.Seed(time.Now().Unix())
-	a := ace.Default()
-	a.GET("/", func(c *ace.C) {
+	a := gin.Default()
+	a.GET("/", func(c *gin.Context) {
 		result := getDataFromBackend("http://127.0.0.1:8081/")
 
 		select {
@@ -47,12 +47,12 @@ func getDataFromBackend(backend string) <-chan []byte {
 	work := make(chan []byte)
 	go func() {
 		resp, err := http.Get(backend)
-		if err != nil {
-			// handle error
-		}
 		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-		work <- body
+		if err == nil {
+			if body, err := ioutil.ReadAll(resp.Body); err == nil {
+				work <- body
+			}
+		}
 	}()
 	return work
 }
