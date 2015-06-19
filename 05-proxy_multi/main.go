@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
-	"sync"
 	"time"
 )
 
@@ -50,9 +49,6 @@ func main() {
 func getDataFromBackends(timeOut <-chan bool, workers []string) chan *DataFormat {
 	done := make(chan struct{})
 	responses := make([]<-chan []byte, len(workers))
-	var wg sync.WaitGroup
-
-	wg.Add(len(workers))
 
 	for i := range workers {
 		result := getDataFromBackend(done, workers[i])
@@ -67,11 +63,9 @@ func getDataFromBackends(timeOut <-chan bool, workers []string) chan *DataFormat
 				r, err := parse(body)
 				if nil == err {
 					result <- r
-					wg.Done()
 					defer close(done)
 				}
 			case <-timeOut:
-				wg.Done()
 				defer close(done)
 			case <-done:
 			}
