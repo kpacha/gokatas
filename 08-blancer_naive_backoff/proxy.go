@@ -10,11 +10,11 @@ type Proxy struct {
 }
 
 func (p *Proxy) AddBackend(worker string, cancel <-chan struct{}) {
-	p.Balancer.AddBackend(worker, cancel)
+	p.LoadBalancer.AddBackend(worker, cancel)
 }
 
 func (p *Proxy) RemoveBackend(worker string, cancel <-chan struct{}) {
-	p.Balancer.RemoveBackend(worker, cancel)
+	p.LoadBalancer.RemoveBackend(worker, cancel)
 }
 
 func (p *Proxy) ProcessFirstResponse(pipes *Pipes) {
