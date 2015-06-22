@@ -1,11 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"math/rand"
 	"time"
-	"flag"
 )
 
 var port int

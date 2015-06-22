@@ -1,7 +1,7 @@
 package main
 
 type Pipes struct {
-	Done chan struct{}
+	Done   chan struct{}
 	Result chan *DataFormat
 }
 

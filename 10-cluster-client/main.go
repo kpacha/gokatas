@@ -1,13 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"math/rand"
-	"time"
-	"flag"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 func main() {

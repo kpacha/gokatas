@@ -1,33 +1,33 @@
 package main
 
 import (
+	"math/rand"
 	"net/http"
 	"time"
-	"math/rand"
 )
 
 type Membership struct {
-	Workers []string
-	TotalWorkers int
+	Workers          []string
+	TotalWorkers     int
 	MaxWorkersOnAJob int
-	Strategy string
-	RemoveWorker chan string
-	AddWorker chan string
-	NextWorkerSet chan []string
-	MonitorWorker chan string
-	Backoff BackoffPolicy
+	Strategy         string
+	RemoveWorker     chan string
+	AddWorker        chan string
+	NextWorkerSet    chan []string
+	MonitorWorker    chan string
+	Backoff          BackoffPolicy
 }
 
 func NewMembership(workers []string, strategy *string, poolSize *int) *Membership {
-	m := &Membership {
-		Workers: workers,
-		TotalWorkers: len(workers),
-		Strategy: *strategy,
+	m := &Membership{
+		Workers:          workers,
+		TotalWorkers:     len(workers),
+		Strategy:         *strategy,
 		MaxWorkersOnAJob: getMaxWorkersOnAJob(strategy, len(workers)),
-		RemoveWorker: make(chan string, *poolSize),
-		AddWorker: make(chan string, *poolSize),
-		NextWorkerSet: make(chan []string, *poolSize),
-		MonitorWorker: make(chan string, *poolSize),
+		RemoveWorker:     make(chan string, *poolSize),
+		AddWorker:        make(chan string, *poolSize),
+		NextWorkerSet:    make(chan []string, *poolSize),
+		MonitorWorker:    make(chan string, *poolSize),
 		Backoff: BackoffPolicy{
 			[]int{100, 250, 600, 1300, 3000, 6500, 14000, 30000, 60000, 300000},
 			20,
@@ -38,7 +38,7 @@ func NewMembership(workers []string, strategy *string, poolSize *int) *Membershi
 }
 
 func (m *Membership) AddBackend(worker string, cancel chan struct{}) {
-	select{
+	select {
 	case m.AddWorker <- worker:
 		close(cancel)
 	case <-cancel:
@@ -46,7 +46,7 @@ func (m *Membership) AddBackend(worker string, cancel chan struct{}) {
 }
 
 func (m *Membership) RemoveBackend(worker string, cancel chan struct{}) {
-	select{
+	select {
 	case m.RemoveWorker <- worker:
 		close(cancel)
 	case <-cancel:
@@ -56,14 +56,14 @@ func (m *Membership) RemoveBackend(worker string, cancel chan struct{}) {
 func getMaxWorkersOnAJob(strategy *string, totalWorkers int) int {
 	maxWorkersOnAJob := 0
 	switch *strategy {
-		case "one":
-			maxWorkersOnAJob = 1
-		case "two":
-			maxWorkersOnAJob = 2
-		case "majority":
-			maxWorkersOnAJob = totalWorkers / 2 + 1
-		case "all":
-			maxWorkersOnAJob = totalWorkers
+	case "one":
+		maxWorkersOnAJob = 1
+	case "two":
+		maxWorkersOnAJob = 2
+	case "majority":
+		maxWorkersOnAJob = totalWorkers/2 + 1
+	case "all":
+		maxWorkersOnAJob = totalWorkers
 	}
 	if maxWorkersOnAJob > totalWorkers {
 		maxWorkersOnAJob = totalWorkers
@@ -72,8 +72,8 @@ func getMaxWorkersOnAJob(strategy *string, totalWorkers int) int {
 }
 
 func (m *Membership) manageWorkerPool() {
-	for{
-		select{
+	for {
+		select {
 		case worker := <-m.MonitorWorker:
 			if 0 <= m.remove(worker) {
 				go m.rejoinWorker(worker, 0)
@@ -105,7 +105,7 @@ func (m *Membership) drainWorkerSet() {
 func (m *Membership) remove(worker string) int {
 	workerId := m.getWorkerId(worker)
 	if 0 <= workerId {
-		workers := append(m.Workers[:workerId], m.Workers[workerId + 1:]...)
+		workers := append(m.Workers[:workerId], m.Workers[workerId+1:]...)
 		m.rescale(workers)
 	}
 	return workerId
@@ -150,7 +150,7 @@ func (m *Membership) rejoinWorker(worker string, attempt int) {
 			defer resp.Body.Close()
 			m.AddWorker <- worker
 		} else {
-			m.rejoinWorker(worker, attempt + 1)
+			m.rejoinWorker(worker, attempt+1)
 		}
 	}
 }

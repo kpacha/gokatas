@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"strings"
-	"github.com/gin-gonic/gin"
-	"time"
 	"github.com/davecheney/profile"
+	"github.com/gin-gonic/gin"
+	"strings"
+	"time"
 )
 
 const globalTimeout = 300 * time.Millisecond
@@ -19,8 +19,8 @@ func main() {
 	flag.Parse()
 
 	cfg := profile.Config{
-		CPUProfile: true,
-		MemProfile: true,
+		CPUProfile:  true,
+		MemProfile:  true,
 		ProfilePath: ".",
 	}
 	p := profile.Start(&cfg)
@@ -30,9 +30,9 @@ func main() {
 
 	server := gin.Default()
 	server.GET("/", func(c *gin.Context) {
-		pipes := &Pipes {
-			Done:		make(chan struct{}),
-			Result:		make(chan *DataFormat),
+		pipes := &Pipes{
+			Done:   make(chan struct{}),
+			Result: make(chan *DataFormat),
 		}
 		go proxy.ProcessFirstResponse(pipes)
 		defer close(pipes.Done)
@@ -46,7 +46,7 @@ func main() {
 
 	})
 
-	go func(){
+	go func() {
 		admin := gin.Default()
 		admin.POST("/worker/*endpoint", func(c *gin.Context) {
 			worker := c.Param("endpoint")
@@ -62,7 +62,7 @@ func main() {
 			}
 
 		})
-		admin.Run(fmt.Sprintf(":%d", *port - 10))
+		admin.Run(fmt.Sprintf(":%d", *port-10))
 	}()
 
 	server.Run(fmt.Sprintf(":%d", *port))

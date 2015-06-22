@@ -10,7 +10,7 @@ type Balancer struct {
 }
 
 func NewBalancer(workers []string, strategy *string, poolSize *int) *Balancer {
-	return &Balancer { NewMembership(workers, strategy, poolSize) }
+	return &Balancer{NewMembership(workers, strategy, poolSize)}
 }
 
 func (b *Balancer) AddBackend(worker string, cancel chan struct{}) {
@@ -24,7 +24,7 @@ func (b *Balancer) RemoveBackend(worker string, cancel chan struct{}) {
 func (b *Balancer) GetDataFromBackends(done chan struct{}) chan []byte {
 	responses := make(chan []byte)
 	go func() {
-		select{
+		select {
 		case backends := <-b.Membership.NextWorkerSet:
 			for _, backend := range backends {
 				go b.getDataFromBackend(responses, done, backend)

@@ -4,12 +4,12 @@ import (
 	"encoding/xml"
 	"flag"
 	"fmt"
+	"github.com/davecheney/profile"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"time"
-	"math/rand"
-	"github.com/davecheney/profile"
 )
 
 type DataFormat struct {
@@ -20,14 +20,14 @@ type DataFormat struct {
 }
 
 type Balancer struct {
-	Workers []string
-	TotalWorkers int
+	Workers          []string
+	TotalWorkers     int
 	MaxWorkersOnAJob int
 }
 
 type Pipes struct {
-	Done chan struct{}
-	Result chan *DataFormat
+	Done    chan struct{}
+	Result  chan *DataFormat
 	TimeOut <-chan bool
 }
 
@@ -40,8 +40,8 @@ func main() {
 	flag.Parse()
 
 	cfg := profile.Config{
-		CPUProfile: true,
-		MemProfile: true,
+		CPUProfile:  true,
+		MemProfile:  true,
 		ProfilePath: ".",
 	}
 	p := profile.Start(&cfg)
@@ -74,29 +74,29 @@ func newBalancer(totalWorkers *int, strategy *string) *Balancer {
 	}
 	maxWorkersOnAJob := 0
 	switch *strategy {
-		case "one":
-			maxWorkersOnAJob = 1
-		case "two":
-			maxWorkersOnAJob = 2
-		case "majority":
-			maxWorkersOnAJob = len(workers) / 2 + 1
-		case "all":
-			maxWorkersOnAJob = len(workers)
+	case "one":
+		maxWorkersOnAJob = 1
+	case "two":
+		maxWorkersOnAJob = 2
+	case "majority":
+		maxWorkersOnAJob = len(workers)/2 + 1
+	case "all":
+		maxWorkersOnAJob = len(workers)
 	}
 	if maxWorkersOnAJob > len(workers) {
 		maxWorkersOnAJob = len(workers)
 	}
-	return &Balancer {
-		Workers: workers,
-		TotalWorkers: len(workers),
+	return &Balancer{
+		Workers:          workers,
+		TotalWorkers:     len(workers),
 		MaxWorkersOnAJob: maxWorkersOnAJob,
 	}
 }
 
 func processFirstResponse(timeOut <-chan bool, balancer *Balancer) chan *DataFormat {
-	pipes := &Pipes {
-		Done:	make(chan struct{}),
-		Result:	make(chan *DataFormat),
+	pipes := &Pipes{
+		Done:    make(chan struct{}),
+		Result:  make(chan *DataFormat),
 		TimeOut: timeOut,
 	}
 	responses := balancer.GetDataFromBackends(pipes.Done)

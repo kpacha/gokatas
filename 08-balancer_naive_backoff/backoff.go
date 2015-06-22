@@ -3,12 +3,12 @@ package main
 // Code stolen from Peter Teichman ("http://blog.gopheracademy.com/advent-2014/backoff/")
 
 import (
-	"time"
 	"math/rand"
+	"time"
 )
 
 type BackoffPolicy struct {
-	Millis []int
+	Millis     []int
 	MaxRetries int
 }
 

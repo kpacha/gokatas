@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/davecheney/profile"
 	"github.com/gin-gonic/gin"
 	"time"
-	"github.com/davecheney/profile"
 )
 
 const globalTimeout = 300 * time.Millisecond
@@ -18,8 +18,8 @@ func main() {
 	flag.Parse()
 
 	cfg := profile.Config{
-		CPUProfile: true,
-		MemProfile: true,
+		CPUProfile:  true,
+		MemProfile:  true,
 		ProfilePath: ".",
 	}
 	p := profile.Start(&cfg)
@@ -29,9 +29,9 @@ func main() {
 
 	a := gin.Default()
 	a.GET("/", func(c *gin.Context) {
-		pipes := &Pipes {
-			Done:		make(chan struct{}),
-			Result:		make(chan *DataFormat),
+		pipes := &Pipes{
+			Done:   make(chan struct{}),
+			Result: make(chan *DataFormat),
 		}
 		go proxy.ProcessFirstResponse(pipes)
 		defer close(pipes.Done)
