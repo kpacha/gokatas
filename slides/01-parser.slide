@@ -1,0 +1,124 @@
+GoKatas - 01
+Simple Parser (a.k.a. Playing around with the basics)
+Tags: golang, katas
+
+https://github.com/kpacha/gokatas
+PR's are welcome!!!
+
+* Hello world (a must have)
+
+.play 01-simple-parser/hello1.go
+
+.link https://tour.golang.org/basics/1 Check out the Go Tour!!!
+
+* Hello world (a must have)
+
+.play 01-simple-parser/hello2.go
+
+* Simple Parser
+
+Goals:
+
+- Unserialize a XML-formated string
+- Print some entity info to probe you got it
+- Serialize the entity into a json-formated string
+
+Hints:
+
+- Check out the language packages at https://golang.org/pkg/ (there is a package for both encoding types)
+- Golang documentation is amazing! Almost everything has attached a pretty example you can run and play with
+
+Also, we aren't interested in the performance of the resulting application.
+
+* Simple Parser
+
+We want to process a simple stock report with just a list of product codes and the number of items a store has.
+
+Data to process
+
+.code 01-simple-parser/simple-parser-basic.go /xmlData :=/,/^<\/ProductList>/
+
+Data to emit
+
+	{"products":[{"sku":"ABC123","quantity":2},{"sku":"ABC124","quantity":20}]}
+
+* Simple Parser
+
+Take a look to the documentation related to the methods:
+
+.link https://golang.org/pkg/encoding/xml/#Unmarshal XML unmarshalling
+
+.link https://golang.org/pkg/encoding/json/#Marshal json marshalling
+
+remember to check out the examples included in those auto-generated docs! (yes, that's possible in go land!!!)
+
+* Simple Parser
+
+With the given specs and after reading some documentation, we come to this struct
+
+.code 01-simple-parser/simple-parser-basic.go /^type Stock/,/^}/
+
+Now, let's connect all the dots!
+
+* Simple Parser
+
+.play 01-simple-parser/simple-parser-basic.go
+
+* Simple Parser
+
+Now, move the parsing stuff to a function
+
+Remember, we've already seen a taste of how go functions are...
+
+.code 01-simple-parser/hello2.go /^func greeter/,/^}/
+
+* Simple Parser
+
+Go functions can also return one or more values
+
+.play 01-simple-parser/function.go
+
+* Simple Parser
+
+.play 01-simple-parser/simple-parser-function.go
+
+* Simple Parser
+
+Time to simulate some fake random load on the parsing process!
+
+Add some random delays into every step of the `parse` function like this:
+
+	time.Sleep(time.Duration(rand.Int31n(1000)) * time.Millisecond)
+	// xml stuff here
+	time.Sleep(time.Duration(rand.Int31n(1000)) * time.Millisecond)
+	// json stuff here
+	time.Sleep(time.Duration(rand.Int31n(1000)) * time.Millisecond)
+	// return the result
+
+* Simple Parser
+
+.play 01-simple-parser/simple-parser-delayed.go
+
+* Simple Parser
+
+Finally, since we wanted the `parse` function to take a random time to finish (from millis to 3 secs), the response time of the process could vary too much
+
+How can we improve that metric without affecting the `parse` process?
+
+* Simple Parser
+
+Maybe we could execute it several times concurrently, and just get the result from the quickest one. Let's say we call it 10 times...
+
+How can we do that without futures, callbacks and other animals?
+
+Time to play with goroutines and channels!!!
+
+* Simple Parser
+
+Back to the `hello world` example, let's create 10 goroutines and wait for them to greet someone before ending the program
+
+.play 01-simple-parser/hello3.go
+
+* Simple Parser
+
+.play 01-simple-parser/simple-parser.go
