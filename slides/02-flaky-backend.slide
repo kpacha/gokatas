@@ -1,0 +1,178 @@
+GoKatas - 02
+The Flaky Backend (a.k.a. Messing with http services)
+Tags: golang, katas, gin-gonic
+
+https://github.com/kpacha/gokatas
+PR's are welcome!!!
+
+* Set up
+
+We're going to build a dummy http service so we can simulate a stock report service.
+
+We'll be using the gin-gonic/gin library for the http routing, but golang comes with lots of native packages for all the low level stuff.
+
+So let's install the dependency an move on
+
+	$ go get github.com/gin-gonic/gin
+
+* Fun With Flags
+
+On next episodes, we'll want to run several instances of our flaky service in the same machine, so we must start by adding a flag to our app.
+
+Flag is the golang package for managing cli options and arguments properly
+
+Your task is:
+
+- To create a main function for the service and get the port argument from the user call
+- If the user doesn't specify a port, use 8081
+
+* Fun With Flags
+
+	var port int
+
+	func init() {
+		flag.IntVar(&port, "port", 8081, "the port of the service")
+	}
+
+	func main() {
+		flag.Parse()
+		fmt.Printf("Starting the flaky backend at port [%d]\n", port)
+
+* Random String Generator
+
+Create a random string generator. It will be used as a random sku generator.
+
+Hint: in go, `strings` can be build with an array of `rune`
+
+* Random String Generator
+
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-.")
+
+	func randSeq(n int) string {
+		b := make([]rune, n)
+		for i := range b {
+			b[i] = letters[rand.Intn(len(letters))]
+		}
+		return string(b)
+	}
+
+* Random Product Generator
+
+Create a generator for the XML description of a product. It must have a random sku and a random quantity.
+
+This is a possible result:
+
+	\n\t<Product>\n\t\t<sku>Supu</sku>\n\t\t<quantity>42</quantity>\n\t</Product>
+
+One more thing, sku's must have 40 characters!
+
+* Random Product Generator
+
+A possible solution:
+
+	func MakeProduct() string {
+		xmlPattern := "\n\t<Product>\n\t\t<sku>%s</sku>\n\t\t<quantity>%d</quantity>\n\t</Product>"
+		return fmt.Sprintf(xmlPattern, randSeq(40), rand.Int31n(100))
+	}
+
+* Random Load Simulator
+
+We're almost there! But before building the flaky service we need a load simulator function
+
+This function must add some random delay to the operation following these rules:
+
+- 5% of the request shouldn't be delayed
+- 20% of the requests must be delayed a random time between 0 and 10 millis
+- 50% of the requests must be delayed a random time between 50 and 100 millis
+- 25% of the requests must be delayed a random time between 200 and 700 millis
+
+All random generators should use an uniform distribution function
+
+* Random Load Simulator
+
+	func fakeLoad() {
+		rnd := rand.Int31n(100)
+		if 20 > rnd {
+			time.Sleep(time.Duration(rand.Int31n(10)) * time.Millisecond)
+		} else if 70 > rnd {
+			time.Sleep(time.Duration(rand.Int31n(50)+50) * time.Millisecond)
+		} else if 95 > rnd {
+			time.Sleep(time.Duration(rand.Int31n(500)+200) * time.Millisecond)
+		}
+	}
+
+* HTTP service
+
+A simple demo of gin in action
+
+	package main
+
+	import "github.com/gin-gonic/gin"
+
+	func main() {
+	    r := gin.Default()
+	    r.GET("/ping", func(c *gin.Context) {
+	        c.JSON(200, gin.H{
+	            "message": "pong",
+	        })
+	    })
+	    r.Run() // listen and server on 0.0.0.0:8080
+	}
+
+* HTTP service
+
+We want to create an endpoint for serving some random stock reports with different random response times
+
+In order to make the service even more flaky, we want to return some `500 - Internal error` responses. 
+
+Also:
+
+- The error rate should be about 10%
+- The error responses shouldn't be delayed
+
+* HTTP service
+
+	responsePattern := "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<ProductList>%s\n</ProductList>"
+	a := gin.Default()
+	a.GET("/", func(c *gin.Context) {
+		fakeLoad()
+		if 90 < rand.Int31n(100) {
+			c.String(500, "Internal server error")
+		} else {
+			products := ""
+			for total := rand.Int31n(20); total > 0; total-- {
+				products += MakeProduct()
+			}
+			c.String(200, fmt.Sprintf(responsePattern, products))
+		}
+	})
+	a.Run(fmt.Sprintf(":%d", port))
+
+Rather than returning plain text, we'd use the native XML support already available in the gin lib, maybe...
+
+* HTTP service
+
+Test the service reponse times with several `ab` calls. Does it performs like expected?
+
+BTW, did you notice the way it scales?
+
+	$ ab -c20 -n1000 http://127.0.0.1:8081/
+	...
+	Requests per second:    127.73 [#/sec] (mean)
+	Time per request:       156.580 [ms] (mean)
+	Time per request:       7.829 [ms] (mean, across all concurrent requests)
+	...
+
+	$ ab -c40 -n1000 http://127.0.0.1:8081/
+	...
+	Requests per second:    239.36 [#/sec] (mean)
+	Time per request:       167.112 [ms] (mean)
+	Time per request:       4.178 [ms] (mean, across all concurrent requests)
+	...
+
+	$ ab -c60 -n1000 http://127.0.0.1:8081/
+	...
+	Requests per second:    362.88 [#/sec] (mean)
+	Time per request:       165.346 [ms] (mean)
+	Time per request:       2.756 [ms] (mean, across all concurrent requests)
+
