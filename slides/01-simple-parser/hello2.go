@@ -14,10 +14,10 @@ func main() {
 		name = "World"
 	}
 	for i := 0; i < 10; i++ {
-		greeter(name, i)
+		greet(name, i)
 	}
 }
 
-func greeter(name string, i int) {
-	fmt.Printf("#%d: Hello, %s!\n", i, name)
+func greet(name string, i int) {
+	fmt.Printf("Greeter #%d: Hello, %s!\n", i, name)
 }

@@ -15,6 +15,10 @@ PR's are welcome!!!
 
 .play 01-simple-parser/hello2.go
 
+* Hello world (a must have)
+
+.play 01-simple-parser/hello2_class.go
+
 * Simple Parser
 
 Goals:
@@ -70,7 +74,7 @@ Now, move the parsing stuff to a function
 
 Remember, we've already seen a taste of how go functions are...
 
-.code 01-simple-parser/hello2.go /^func greeter/,/^}/
+.code 01-simple-parser/hello2.go /^func greet/,/^}/
 
 * Simple Parser
 
@@ -113,7 +117,7 @@ How can we do that without futures, callbacks and other animals?
 
 Time to play with goroutines and channels!!!
 
-* Simple Parser
+* Hello World (director's cut)
 
 Back to the `hello world` example, let's create 10 goroutines and wait for them to greet someone before ending the program
 

@@ -23,8 +23,8 @@ Flag is the golang package for managing cli options and arguments properly
 
 Your task is:
 
-- To create a main function for the service and get the port argument from the user call
-- If the user doesn't specify a port, use 8081
+- To create a main function for the service and get the port argument from the user's call
+- If the user didn't specify a port, use 8081
 
 * Fun With Flags
 
