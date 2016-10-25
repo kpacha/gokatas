@@ -3,6 +3,11 @@ gokatas
 
 simple katas for golang
 
+## Dependencies
+
+	$ go get -u github.com/streadway/handy/breaker
+	$ go get -u github.com/gin-gonic/gin
+
 ## TOC
 
 ### 01 - simple parser
@@ -64,6 +69,12 @@ Goal: Be able to adapt the number of goroutines depending on the cluster status
 Extend the simple client so it registers itself periodically to the proxy
 
 Goal: Create a simple scheduled task
+
+### 10 - real-life implementation
+
+Move to a more 'production-ready' environment, without all those custom components
+
+Goal: Play with some microservice-oriented components and libs
 
 ## Slides
 
