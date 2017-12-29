@@ -21,10 +21,10 @@ func main() {
 
 	a := gin.Default()
 	a.GET("/", func(c *gin.Context) {
-		fakeLoad()
 		if 90 < rand.Int31n(100) {
 			c.String(500, "Internal server error")
 		} else {
+			fakeLoad()
 			products := ""
 			for total := rand.Int31n(20); total > 0; total-- {
 				products += MakeProduct()
